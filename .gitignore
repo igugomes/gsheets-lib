@@ -1,4 +1,4 @@
 .idea/
 .python-version
 Pipfile.lock
-gsheet/client_secret.json
+gsheet/.credentials/client_secret.json
