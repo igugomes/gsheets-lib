@@ -1,17 +1,5 @@
-__author__ = "Igor Gomes"
-__email__ = "igor.mlgomes@gmail.com"
-
-"""
-BEFORE RUNNING:
----------------
-1. If not already done, enable the Google Sheets API
-   and check the quota for your project at
-   https://console.developers.google.com/apis/api/sheets
-2. Install the Python client library for Google APIs by running
-   `pip install --upgrade google-api-python-client`
-"""
-
 import os
+import logging
 
 from apiclient import discovery
 from oauth2client import client
@@ -26,6 +14,19 @@ except ImportError:
     import argparse
 
     flags = None
+
+__author__ = "Igor Gomes"
+__email__ = "igor.mlgomes@gmail.com"
+
+"""
+BEFORE RUNNING:
+---------------
+1. If not already done, enable the Google Sheets API
+   and check the quota for your project at
+   https://console.developers.google.com/apis/api/sheets
+2. Install the Python client library for Google APIs by running
+   `pip install --upgrade google-api-python-client`
+"""
 
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 CLIENT_SECRET_FILE = 'client_secret.json'
@@ -64,8 +65,9 @@ class Gsheet(object):
         store = Storage(credential_path)
         try:
             credentials = store.get()
-        except:
-            print('Working with flow-based credentials instantiation')
+        except RuntimeError as err:
+            logging.info('Working with flow-based credentials instantiation')
+            logging.error('Error message: \n{}'.format(err))
 
         if not credentials or credentials.invalid:
             flow = client.flow_from_clientsecrets(credential_path, SCOPES)
@@ -74,7 +76,7 @@ class Gsheet(object):
                 credentials = tools.run_flow(flow, store, flags)
             else:  # Needed only for compatibility with Python 2.6
                 credentials = tools.run(flow, store)
-            print('Storing credentials to ' + credential_path)
+            logging.info('Storing credentials to ' + credential_path)
         return credentials
 
     def get_service(self):
@@ -87,9 +89,6 @@ class Gsheet(object):
         :param values: The values to append to the spreadsheet
         :return: The append action
         """
-        # Values will be appended after the last row of the table.
-        range_ = range_
-
         # How the input data should be interpreted.
         value_input_option = 'RAW'
 
@@ -107,10 +106,8 @@ class Gsheet(object):
         """
         Clear the given values for the given spreadsheet and range
         :param range_: The A1 notation of the values to clear.
-        :param values: The values to be cleared from the spreadsheet
         :return: The clear action
         """
-        range_ = range_
         request = self.get_service().spreadsheets().values().clear(spreadsheetId=self._spreadsheet_id, range=range_)
         return request.execute()
 
@@ -121,8 +118,6 @@ class Gsheet(object):
         :param value_render_option: How values should be represented in the output.
         :return: The values catch related to the given arguments
         """
-        range_ = range_
-
         # The default render option is ValueRenderOption.FORMATTED_VALUE.
         if 'un' in value_render_option:
             value_render_option = 'UNFORMATTED_VALUE'
@@ -149,8 +144,6 @@ class Gsheet(object):
         :param values: The values to be updated in the spreadsheet
         :return: The updated values related to teh given arguments
         """
-        range_ = range_
-
         # How the input data should be interpreted.
         value_input_option = 'RAW'
 
